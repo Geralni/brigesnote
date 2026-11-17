@@ -41,7 +41,7 @@ class SyncLocations extends Command
             $this->error('Error al obtener regiones');
             return;
         }
-        $regions = $response->json()['region'];
+        $regions = $response->json()['region'] ?? [];
 
         for ($i=0;$i<count($regions);$i++) {
             $region=$regions[$i];
@@ -74,7 +74,7 @@ class SyncLocations extends Command
             $this->error("Error al obtener provincias para la región $regionId");
             return;
         }
-        $provinces = $response->json()['provincia'];
+        $provinces = $response->json()['provincia'] ?? [];
         if(isset($provinces['idProvincia'])){
             Province::updateOrCreate(
                 ['idProvincia' => $provinces['idProvincia']],
@@ -118,7 +118,7 @@ class SyncLocations extends Command
             return;
         }
 
-        $districts = $response->json()['distrito'];
+        $districts = $response->json()['distrito'] ?? [];
         if(isset($districts['idDistrito'])){
                 District::updateOrCreate(
                     ['idDistrito' => $districts['idDistrito']],
@@ -183,9 +183,9 @@ class SyncLocations extends Command
                     ['codMod' => $school['codMod']],
                     [
                         'idDistrito' => $districtId,
-                        'nombreCenEdu' => $school['cenEdu'],
-                        'cenPob' => $school['cenPob'],
-                        'dirCen' => $school['dirCen'],
+                        'nombreCenEdu' => $school['cenEdu'] ?? null,
+                        'cenPob' => $school['cenPob'] ?? null,
+                        'dirCen' => $school['dirCen'] ?? null,
                         'director' => $school['director'] ?? null,
                         'dis_crecer' => $school['dis_crecer'] ?? null,
                         'dis_juntos' => $school['dis_juntos'] ?? null,

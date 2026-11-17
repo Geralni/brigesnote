@@ -215,6 +215,63 @@ class SyncLocationsTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_respuesta_de_regiones_sin_clave_region_no_rompe_el_comando(): void
+    {
+        $this->fakeEscale([
+            'regiones' => fn () => ['mensaje' => 'sin datos'],
+        ]);
+
+        $this->artisan('sync:locations')
+            ->expectsOutput('Regiones sincronizadas correctamente.')
+            ->expectsOutput('Sincronización completa.')
+            ->assertExitCode(0);
+
+        $this->assertSame(0, Region::count());
+    }
+
+    public function test_respuestas_sin_clave_provincia_o_distrito_no_rompen_el_comando(): void
+    {
+        $this->fakeEscale([
+            'regiones' => fn () => ['region' => [$this->region('15', 'LIMA'), $this->region('04', 'AREQUIPA')]],
+            'provincias' => fn ($q) => $q['idRegion'] === '15'
+                ? ['mensaje' => 'sin datos']
+                : ['provincia' => [$this->province('0401', 'AREQUIPA')]],
+            'distritos' => fn () => ['mensaje' => 'sin datos'],
+        ]);
+
+        $this->artisan('sync:locations')
+            ->expectsOutput('Sincronización completa.')
+            ->assertExitCode(0);
+
+        $this->assertSame(2, Region::count());
+        $this->assertSame(1, Province::count());
+        $this->assertSame(0, District::count());
+    }
+
+    public function test_colegios_en_lista_sin_cenedu_cenpob_o_dircen_se_guardan_con_null(): void
+    {
+        $this->fakeEscale([
+            'regiones' => fn () => ['region' => [$this->region('15', 'LIMA')]],
+            'provincias' => fn () => ['provincia' => [$this->province('1501', 'LIMA')]],
+            'distritos' => fn () => ['distrito' => [['idDistrito' => '150101', 'nombreDistrito' => 'LIMA']]],
+            'instituciones' => fn () => ['items' => [
+                ['codMod' => '0000001'],
+                $this->school('0000002', 'COMPLETO'),
+            ]],
+        ]);
+
+        $this->artisan('sync:locations')->assertExitCode(0);
+
+        $this->assertDatabaseHas('schools', [
+            'codMod' => '0000001',
+            'idDistrito' => '150101',
+            'nombreCenEdu' => null,
+            'cenPob' => null,
+            'dirCen' => null,
+        ]);
+        $this->assertDatabaseHas('schools', ['codMod' => '0000002', 'nombreCenEdu' => 'COMPLETO']);
+    }
+
     public function test_es_idempotente_y_actualiza_registros_existentes(): void
     {
         $nombre = 'COLEGIO ORIGINAL';
