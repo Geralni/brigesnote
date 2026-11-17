@@ -2,17 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
-     *
-     * @return void
+     * La ruta "/" sigue respondiendo 200 con la vista welcome.
      */
-    public function testBasicTest()
+    public function test_la_raiz_responde_200(): void
     {
         $response = $this->get('/');
 
