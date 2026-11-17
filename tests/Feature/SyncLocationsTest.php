@@ -6,6 +6,7 @@ use App\Models\District;
 use App\Models\Province;
 use App\Models\Region;
 use App\Models\School;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -46,7 +47,7 @@ class SyncLocationsTest extends TestCase
 
             $result = $routes[$endpoint]($query);
 
-            return $result instanceof \GuzzleHttp\Promise\PromiseInterface ? $result : Http::response($result);
+            return $result instanceof PromiseInterface ? $result : Http::response($result);
         });
     }
 
