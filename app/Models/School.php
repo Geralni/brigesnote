@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class School extends Model
 {
-
+    /** @use HasFactory<\Database\Factories\SchoolFactory> */
+    use HasFactory;
     protected $table = 'schools';
     protected $primaryKey = 'codMod';
     public $incrementing = false;
